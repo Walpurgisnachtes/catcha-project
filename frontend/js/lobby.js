@@ -1,21 +1,56 @@
 // lobby.js
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ActivityIndicator, Alert } from "react-native";
+import { useEffect, useState } from "react";
+import Header from "./header";
 
-export default function Lobby({ onLogout }) {
+export default function Lobby({ onLogout, onSurveyNeeded, account }) {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkSurveyStatus();
+  }, []);
+
+  const checkSurveyStatus = async () => {
+    try {
+      const response = await fetch('http://192.168.0.203:8000/check_survey_status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          account: account,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (!data.is_all_finish) {
+          // Survey not completed, redirect to survey
+          onSurveyNeeded();
+        }
+      } else {
+        Alert.alert("錯誤", "無法檢查問卷狀態");
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("錯誤", "無法連線至伺服器");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={require("../assets/login/archetto.png")}
-          style={styles.headerImage}
-        />
-        <View style={styles.headerRight}>
-          <Text style={styles.username}>matthew</Text>
-          <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-            <Text style={styles.logoutButtonText}>Log out</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Header onLogout={onLogout} />
       <Text style={styles.welcomeText}>welcome</Text>
     </View>
   );
@@ -28,41 +63,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  header: {
-    position: "absolute",
-    top: 40, // 考慮到狀態欄高度
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
+  centerContent: {
+    justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  headerImage: {
-    width: 50,
-    height: 50,
-    resizeMode: "contain",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  username: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  logoutButton: {
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-  },
-  logoutButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
   },
   welcomeText: {
     fontSize: 48,

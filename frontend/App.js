@@ -5,11 +5,14 @@ import { View, StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Login from "./js/login";
 import Lobby from "./js/lobby";
+import Survey from "./js/survey";
 import Header from "./js/header"; // 匯入剛才寫的 Header
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userAccount, setUserAccount] = useState("");
+  const [isSurveyCompleted, setIsSurveyCompleted] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
 
   const handleLogin = (account) => {
     setUserAccount(account);
@@ -19,6 +22,11 @@ export default function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserAccount("");
+    setShowSurvey(false);
+  };
+
+  const handleSurveyComplete = () => {
+    setIsSurveyCompleted(true);
     setShowSurvey(false);
   };
 
@@ -35,11 +43,18 @@ export default function App() {
             
             {/* 內容容器：使用 marginTop 預留空間給固定在頂部的 Header */}
             <View style={styles.content}>
+              {showSurvey ? (
+                <Survey 
+                  account={userAccount} 
+                  onComplete={handleSurveyComplete} 
+                />
+              ) : (
                 <Lobby 
                   onLogout={handleLogout} 
                   onSurveyNeeded={() => setShowSurvey(true)} 
                   account={userAccount} 
                 />
+              )}
             </View>
           </>
         )}
