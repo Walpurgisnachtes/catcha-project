@@ -58,3 +58,6 @@ config.ini
 # OS
 Thumbs.db
 .DS_Store
+
+# Custom
+project_documents/
