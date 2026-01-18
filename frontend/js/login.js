@@ -30,7 +30,7 @@ export default function Login({ onLogin }) {
 
       if (response.ok && data.status === "pass") {
         Alert.alert("成功", "登入通過！");
-        onLogin();
+        onLogin(account);
       } else {
         Alert.alert("失敗", "帳號或密碼錯誤");
       }
